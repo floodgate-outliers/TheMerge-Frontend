@@ -80,6 +80,24 @@ export const SelectedPixelsList: FC = () => {
 
     const [showPopup, setShowPopup] = useState(false);
 
+    const clearSelectedPixelsListHandler = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        selectedPixelsList.forEach(({ coordinates }) => {
+            ApiClient.getCoordinateData(coordinates.x, coordinates.y).then(
+                (cd) => {
+                    if (!cd) return;
+                    drawPixel(coordinates.x, coordinates.y, canvas, {
+                        r: cd.color.R,
+                        g: cd.color.G,
+                        b: cd.color.B,
+                    });
+                }
+            );
+        });
+        setSelectedPixelsList([]);
+    };
+
     return (
         <>
             <PixelInfoSection
@@ -92,11 +110,17 @@ export const SelectedPixelsList: FC = () => {
                 <div className="absolute top-0 bottom-0 left-0 right-0 backdrop-blur flex flex-row justify-center items-center z-10">
                     <div className="bg-white px-20 pt-10 pb-10 rounded-lg width-clamp ">
                         <div className="flex flex-row items-start justify-between">
-                            <p className="mb-5 text-2xl font-semibold">
+                            <p className="mb-2 pr-5 text-2xl font-semibold">
                                 Selected pixels
                             </p>
                             <button onClick={() => setShowPopup(false)}>
                                 Close
+                            </button>
+                        </div>
+
+                        <div className="text-center mb-5">
+                            <button onClick={clearSelectedPixelsListHandler}>
+                                Clear
                             </button>
                         </div>
                         <div className="flex flex-row flex-wrap gap-x-10 gap-y-5 max-w-[500px] max-h-[500px] overflow-auto">
