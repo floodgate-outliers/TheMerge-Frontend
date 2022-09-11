@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { constants, ethers } from 'ethers';
+import { BigNumberish, BigNumber, constants, ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 
 import { usePixelCanvasContext } from '../../contexts/PixelCanvasContext';
@@ -7,7 +7,7 @@ import { formatPrice, midEllipsis } from '../../utils/misc';
 import ApiClient from '../../utils/ApiClient';
 import { RgbColor } from 'react-colorful';
 import PixelColorInfo from './PixelColorInfo';
-import { InfoItem, PixelInfoSection } from './PixelInfo';
+import { InfoItem, InfoItemAddress, PixelInfoSection } from './PixelInfo';
 
 export default function PixelLocationInfo() {
     const {
@@ -18,7 +18,7 @@ export default function PixelLocationInfo() {
         setCanvasIsEditable,
     } = usePixelCanvasContext();
 
-    const [price, setPrice] = useState<number>(0);
+    const [price, setPrice] = useState<BigNumberish>('0');
     const [owner, setOwner] = useState<string>('');
     const [prevRGB, setPrevRGB] = useState<RgbColor>({ r: 0, g: 0, b: 0 });
 
@@ -29,7 +29,7 @@ export default function PixelLocationInfo() {
         ).then((cd) => {
             if (!cd) return;
             setPrevRGB({ r: cd.color.R, g: cd.color.G, b: cd.color.B });
-            setPrice(cd.price);
+            setPrice(Number(cd.price));
             setOwner(cd.owner);
         });
     }, [selectedCoordinates]);
@@ -44,12 +44,17 @@ export default function PixelLocationInfo() {
                 name="Price"
                 value={price !== 0 ? formatPrice(String(price)) : '—'}
             />
-            <InfoItem
+            <InfoItemAddress
                 name="Owner"
                 value={
                     owner !== '' && owner !== constants.AddressZero
                         ? midEllipsis(owner, 11)
                         : '—'
+                }
+                link={
+                    owner !== '' && owner !== constants.AddressZero
+                        ? owner
+                        : undefined
                 }
             />
             <InfoItem

@@ -29,7 +29,7 @@ const SelectedPixelsListItem: FC<SelectedPixelsListItemProps> = ({
         const selectedPixel = selectedPixelsList[index];
         const newSelectedPixelsList = [...selectedPixelsList];
         newSelectedPixelsList.splice(index, 1);
-        setSelectedPixelsList([...newSelectedPixelsList]);
+        setSelectedPixelsList(newSelectedPixelsList);
         ApiClient.getCoordinateData(
             selectedPixel.coordinates.x,
             selectedPixel.coordinates.y
@@ -48,24 +48,69 @@ const SelectedPixelsListItem: FC<SelectedPixelsListItemProps> = ({
         });
     };
 
+    const textColor =
+        color.r * 0.299 + color.g * 0.587 + color.b * 0.114 > 186
+            ? '#000000'
+            : '#ffffff';
+
     return (
-        <div key={index} className="flex flex-col justify-center text-center">
+        <div
+            key={index}
+            className="flex flex-col gap-y-2 justify-center text-center "
+        >
             <div
-                className={`w-full aspect-square border-4 border-black`}
+                className={`flex flex-col justify-center items-center w-full aspect-square border-4 border-black`}
                 style={{
                     backgroundColor: `rgb(${color.r}, ${color.g}, ${color.b})`,
+                    color: textColor,
                 }}
-            />
-            <div className="text-sm pt-1 font-semibold">
-                ({coordinates.x}, {coordinates.y})
+            >
+                <div className="text-sm pt-1 font-semibold">
+                    ({coordinates.x}, {coordinates.y})
+                </div>
+                <div>
+                    <button
+                        onClick={() => deleteSelectedPixelHandler(index)}
+                        className="text-sm text-red-400 drop-shadow hover:font-semibold"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+            <div className="flex flex-row gap-x-2">
+                <label>Bid: </label>
+                <input
+                    type="number"
+                    value={ethers.utils.formatEther(
+                        selectedPixelsList[index].price
+                    )}
+                    onChange={(e) => {
+                        try {
+                            if (!Number.isNaN(e.target.value)) {
+                                const newSelectedPixelsList = [
+                                    ...selectedPixelsList,
+                                ];
+                                newSelectedPixelsList[index].price =
+                                    ethers.utils.parseEther(e.target.value);
+                                setSelectedPixelsList([
+                                    ...newSelectedPixelsList,
+                                ]);
+                            }
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    }}
+                    className="border-2 border-black w-full"
+                />
             </div>
             <div>
-                <button
-                    onClick={() => deleteSelectedPixelHandler(index)}
-                    className="text-sm text-red-400 hover:font-semibold"
-                >
-                    Delete
-                </button>
+                <p>
+                    Min bid:{' '}
+                    {ethers.utils.formatEther(
+                        selectedPixelsList[index].minPrice
+                    )}{' '}
+                    ETH
+                </p>
             </div>
         </div>
     );
@@ -148,7 +193,10 @@ export const PixelsList: FC = () => {
             />
             {showPopup && (
                 <div className="absolute top-0 bottom-0 left-0 right-0 backdrop-blur flex flex-row justify-center items-center z-[9990]">
-                    <div className="bg-white px-20 pt-10 pb-10 rounded-lg width-clamp min-w-[500px]" style={{ marginTop: '72px' }}>
+                    <div
+                        className="bg-white px-20 pt-10 pb-10 rounded-lg width-clamp min-w-[500px]"
+                        style={{ marginTop: '72px' }}
+                    >
                         <div className="flex flex-row items-start justify-between">
                             <p className="mb-2 text-2xl font-semibold underline">
                                 {tab === PixelsListTab.SELECTED_PIXELS
@@ -181,7 +229,7 @@ export const PixelsList: FC = () => {
                                 Owned
                             </button>
                         </div>
-                        <div className="grid grid-cols-3 gap-x-10 gap-y-5 w-[500px] max-h-[420px] overflow-auto">
+                        <div className="grid grid-cols-2 gap-x-10 gap-y-5 w-[500px] max-h-[420px] overflow-auto">
                             {tab === PixelsListTab.SELECTED_PIXELS ? (
                                 <SelectedPixelsList />
                             ) : (

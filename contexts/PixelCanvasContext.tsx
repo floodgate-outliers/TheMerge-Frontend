@@ -1,3 +1,4 @@
+import { BigNumber } from 'ethers';
 import {
     createContext,
     Dispatch,
@@ -12,6 +13,7 @@ import {
 import { RgbColor } from 'react-colorful';
 import { useSigner } from 'wagmi';
 import ApiClient, { CoordinateData } from '../utils/ApiClient';
+import {SelectedPixelsList} from "../utils/types";
 
 export interface XYCoordinates {
     x: number;
@@ -33,9 +35,21 @@ interface PixelCanvasContextInterface {
     setSelectedCoordinates: Dispatch<SetStateAction<XYCoordinates>>;
     selectedColor: RgbColor;
     setSelectedColor: Dispatch<SetStateAction<RgbColor>>;
-    selectedPixelsList: { coordinates: XYCoordinates; color: RgbColor }[];
+    selectedPixelsList: {
+        coordinates: XYCoordinates;
+        color: RgbColor;
+        price: BigNumber;
+        minPrice: BigNumber;
+    }[];
     setSelectedPixelsList: Dispatch<
-        SetStateAction<{ coordinates: XYCoordinates; color: RgbColor }[]>
+        SetStateAction<
+            {
+                coordinates: XYCoordinates;
+                color: RgbColor;
+                price: BigNumber;
+                minPrice: BigNumber;
+            }[]
+        >
     >;
     userPixelsList: CoordinateData[];
 
@@ -69,9 +83,7 @@ export default function PixelCanvasContextProvider({
         g: 255,
         b: 255,
     });
-    const [selectedPixelsList, setSelectedPixelsList] = useState<
-        { coordinates: XYCoordinates; color: RgbColor }[]
-    >([]);
+    const [selectedPixelsList, setSelectedPixelsList] = useState<SelectedPixelsList>([]);
     const [userPixelsList, setUserPixelsList] = useState<CoordinateData[]>([]);
 
     const [canvasIsEditable, setCanvasIsEditable] = useState(false);
